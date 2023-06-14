@@ -14,7 +14,7 @@
                 label="Token"
                 prop="token"
             >
-                <el-input v-model="model.token" />
+                <el-input type="password" v-model="model.token" />
             </el-form-item>
             <el-divider>或者</el-divider>
             <el-form-item
