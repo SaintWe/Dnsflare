@@ -107,26 +107,26 @@ type EditDnsRecordRequest = {
 }
 
 
-export async function patchRecord(record: CloudflareDnsRecord, editRequest: EditDnsRecordRequest) {
+export async function patchRecord(zoneId: string, recordId: string, editRequest: EditDnsRecordRequest) {
     const axios = useAxios()
     try {
         await axios.request({
             method: 'patch',
             data: editRequest,
-            url: `/zones/${record.zoneId}/dns_records/${record.id}`,
+            url: `/zones/${zoneId}/dns_records/${recordId}`,
         })
     } catch (err) {
         return err.response.data.errors[0].message
     }
 }
 
-export async function putRecord(record: CloudflareDnsRecord, editRequest: EditDnsRecordRequest) {
+export async function putRecord(zoneId: string, recordId: string, editRequest: EditDnsRecordRequest) {
     const axios = useAxios()
     try {
         await axios.request({
             method: 'put',
             data: editRequest,
-            url: `/zones/${record.zoneId}/dns_records/${record.id}`,
+            url: `/zones/${zoneId}/dns_records/${recordId}`,
         })
     } catch (err) {
         return err.response.data.errors[0].message
