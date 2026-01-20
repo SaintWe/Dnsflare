@@ -1,19 +1,36 @@
 import { useAxios } from '@/utils/requests'
 import { objectToCamelCase, objectToHungarian } from '@/utils/case'
 import { LoadPageFunc, LoadPageResponse, convertPagination } from '@/utils/pagination'
-import { APIResponse, CloudflareDnsRecord, PageSettings, DnsRecordType } from '.'
+import { APIResponse, CloudflareErrorResponse, CloudflareDnsRecord, PageSettings, DnsRecordType } from '.'
+import type { AxiosError } from 'axios'
 
+
+const unknownErrorResponse: CloudflareErrorResponse = {
+    success: false,
+    errors: [{ code: 0, message: 'Unknown error' }],
+    messages: [],
+}
+
+function getErrorResponse(err: unknown): CloudflareErrorResponse {
+    const axiosError = err as AxiosError<CloudflareErrorResponse>
+    return axiosError.response?.data ?? unknownErrorResponse
+}
 
 export async function listZoneDnsRecord(
     zoneId: string, page?: PageSettings): Promise<APIResponse<CloudflareDnsRecord[]>> {
     let url = `/zones/${zoneId}/dns_records`
     const axios = useAxios()
     if (page) {
-        url += `?${new URLSearchParams(objectToHungarian(page)).toString()}`
+        const params = objectToHungarian(page) as Record<string, string | number>
+        const searchParams = new URLSearchParams()
+        Object.entries(params).forEach(([key, value]) => {
+            searchParams.set(key, String(value))
+        })
+        url += `?${searchParams.toString()}`
     }
 
 
-    const response = await axios.request<CloudflareDnsRecord[]>({
+    const response = await axios.request<APIResponse<CloudflareDnsRecord[]>>({
         url,
         method: 'get',
     })
@@ -46,7 +63,7 @@ export async function deleteRecord(payload: CloudflareDnsRecord): Promise<string
             method: 'delete',
         })
     }  catch (err) {
-        return err.response.data.errors[0].message
+        return getErrorResponse(err).errors[0]?.message
     }
 }
 
@@ -81,7 +98,7 @@ export async function createDnsRecord(zone: string, request: CreateDnsRecordRequ
             url: `/zones/${zone}/dns_records`,
         })
     } catch (err) {
-        return err.response.data.errors[0].message
+        return getErrorResponse(err).errors[0]?.message
     }
 }
 
@@ -116,7 +133,7 @@ export async function patchRecord(zoneId: string, recordId: string, editRequest:
             url: `/zones/${zoneId}/dns_records/${recordId}`,
         })
     } catch (err) {
-        return err.response.data.errors[0].message
+        return getErrorResponse(err).errors[0]?.message
     }
 }
 
@@ -129,6 +146,6 @@ export async function putRecord(zoneId: string, recordId: string, editRequest: E
             url: `/zones/${zoneId}/dns_records/${recordId}`,
         })
     } catch (err) {
-        return err.response.data.errors[0].message
+        return getErrorResponse(err).errors[0]?.message
     }
 }

@@ -1,10 +1,10 @@
 <template>
     <el-dialog
         :title="`${modeLocale} Record`"
-        :modelValue="dialogVisible"
+        :model-value="dialogVisible"
         class="container"
-        @update:modelValue="handleClose"
         width="unset"
+        @update:model-value="handleClose"
     >
         <div>
             <el-form
@@ -174,6 +174,8 @@ import { DnsRecordType, CloudflareDnsRecord } from '@/api'
 import type { FormInstance, FormRules } from 'element-plus'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+defineOptions({ name: 'DnsRecordModal' })
 const ruleFormRef = ref<FormInstance>()
 const emits = defineEmits<{
   (event: 'close'): void
